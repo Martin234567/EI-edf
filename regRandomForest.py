@@ -9,8 +9,7 @@ file_path1 = "/Users/maximemacbook/Documents/Centrale/ST4_SCOOC/train CSV.csv"
 file_path2 = "/Users/maximemacbook/Documents/Centrale/ST4_SCOOC/données test CSV.csv"
 df = pd.read_csv(file_path1, sep=';')
 df2 = pd.read_csv(file_path2, sep=';')
-df = df.head(5000)
-df2 = df2.head(5000)
+
 # Supprimer les colonnes inutiles
 X_train = df.drop(columns=["date", "Date","Load","Electricity_balance_not_controllable","Solar_power","Wind_power"])
 X_test = df2.drop(columns=["date", "Date"])
@@ -31,10 +30,15 @@ model.fit(X_train_scaled, y)
 # Prédire sur l'ensemble de test
 y_pred = model.predict(X_test_scaled)
 
-# Évaluer le modèle
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+# Sauvegarder les prédictions dans un fichier CSV
+pd.DataFrame(y_pred, columns=["Predicted_Load"]).to_csv("/Users/maximemacbook/Documents/Centrale/ST4_SCOOC/y_pred.csv", index=False, sep=',')
 
-print(f"Mean Squared Error: {mse:.2f}")
-print(f"R2 Score: {r2:.6f}")
+# Évaluer le modèle
+#mse = mean_squared_error(y, y_pred)
+#r2 = r2_score(y, y_pred)
+
+
+
+#print(f"Mean Squared Error: {mse:.2f}")
+#print(f"R2 Score: {r2:.6f}")
 
