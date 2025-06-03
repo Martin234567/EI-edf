@@ -20,6 +20,13 @@ FEATURES = [
     "month", "tod", "toy", "week_number", "period_hour_changed"
 ]
 
+# Feature engineering 
+def create_rolling_mean_feature(df, feature_name='temperature', window=24):
+    """Crée une feature de moyenne mobile."""
+    df[f'{feature_name}_rolling_mean_{window}h'] = df.groupby('Id')[feature_name].rolling(window=window).mean().reset_index(level=0, drop=True)
+    return df
+
+
 # --- Prétraitement ---
 X = train_df[FEATURES]
 y = train_df[TARGET]
@@ -47,14 +54,16 @@ val_loader = DataLoader(val_dataset, batch_size=64)
 
 # --- Réseau de neurones ---
 class MLP(nn.Module):
-    def _init_(self, input_dim):
-        super(MLP, self)._init_()
+    def __init__(self, input_dim):
+        super(MLP, self).__init__()
         self.model = nn.Sequential(
             nn.Linear(input_dim, 128),
-            nn.ReLU(),
+            nn.BatchNorm1d(128),
+            nn.ELU(),
             nn.Dropout(0.2),
             nn.Linear(128, 64),
-            nn.ReLU(),
+            nn.BatchNorm1d(64),
+            nn.ELU(),
             nn.Dropout(0.1),
             nn.Linear(64, 1)
         )
@@ -67,7 +76,7 @@ loss_fn = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 # --- Entraînement ---
-for epoch in range(100):
+for epoch in range(50):
     model.train()
     for xb, yb in train_loader:
         pred = model(xb)
