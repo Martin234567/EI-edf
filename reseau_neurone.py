@@ -76,7 +76,7 @@ loss_fn = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 # --- Entraînement ---
-for epoch in range(50):
+for epoch in range(75):
     model.train()
     for xb, yb in train_loader:
         pred = model(xb)
