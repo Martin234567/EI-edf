@@ -102,3 +102,4 @@ submission = submission[["Id", "predicted"]]
 submission.to_csv("submission2.csv", index=False)
 
 print("✅ Fichier de soumission 'submission.csv' avec colonnes 'Id' et 'predicted' prêt.")
+
