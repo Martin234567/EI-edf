@@ -5,6 +5,8 @@ from sklearn.preprocessing import StandardScaler
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
+import os
+
 
 # --- Chargement des données ---
 train_df = pd.read_csv("train.csv")
@@ -53,6 +55,8 @@ train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=64)
 
 # --- Réseau de neurones ---
+model_path = "mlp_model.pth"
+
 class MLP(nn.Module):
     def __init__(self, input_dim):
         super(MLP, self).__init__()
@@ -74,23 +78,35 @@ class MLP(nn.Module):
 model = MLP(len(FEATURES))
 loss_fn = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-
-# --- Entraînement ---
-for epoch in range(75):
-    model.train()
-    for xb, yb in train_loader:
-        pred = model(xb)
-        loss = loss_fn(pred, yb)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    
-    # Évaluation sur validation
+# Entraînement MLP
+if (os.path.exists(model_path)) and (input("Voulez-vous changez le nombre d'epoch ? ") in ["Non", "non","nn"]):
+    print("📥 Chargement du modèle MLP...")
+    model.load_state_dict(torch.load(model_path))
     model.eval()
-    with torch.no_grad():
-        val_preds = model(X_val_tensor)
-        val_loss = loss_fn(val_preds, y_val_tensor)
-    print(f"Epoch {epoch+1} - Val Loss: {val_loss.item():.4f}")
+else:
+    nombre_epoch = int(input("Quel nombre d'epoch ? \n"))
+    if os.path.exists(f"mlp_model_{nombre_epoch}.pth"):
+        print("📥 Chargement du modèle MLP...")
+        model.load_state_dict(torch.load(f"mlp_model_{nombre_epoch}.pth"))
+        model.eval()
+    else:
+        print(f"Entrainement à {nombre_epoch} d'epoch")
+        for epoch in range(nombre_epoch):
+            model.train()
+            for xb, yb in train_loader:
+                pred = model(xb)
+                loss = loss_fn(pred, yb)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+        torch.save(model.state_dict(), model_path)
+        
+# Évaluation sur validation
+model.eval()
+with torch.no_grad():
+    val_preds = model(X_val_tensor)
+    val_loss = loss_fn(val_preds, y_val_tensor)
+
 
 # --- Prédiction test ---
 model.eval()
