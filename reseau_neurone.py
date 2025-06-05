@@ -53,11 +53,11 @@ class MLP(nn.Module):
     def __init__(self, input_dim):
         super(MLP, self).__init__()
         self.model = nn.Sequential(
-            nn.Linear(input_dim, 256),
-            nn.BatchNorm1d(256),
+            nn.Linear(input_dim, 128),
+            nn.BatchNorm1d(128),
             nn.ELU(),
             nn.Dropout(0.2),
-            nn.Linear(256, 64),
+            nn.Linear(128, 64),
             nn.BatchNorm1d(64),
             nn.ELU(),
             nn.Dropout(0.1),
