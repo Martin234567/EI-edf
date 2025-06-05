@@ -47,7 +47,7 @@ train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=64)
 
 # --- Réseau de neurones ---
-model_path = "mlp_model.pth"
+model_path = "Models_saved/mlp_last_model.pth"
 
 class MLP(nn.Module):
     def __init__(self, input_dim):
@@ -77,9 +77,9 @@ if (os.path.exists(model_path)) and (input("Voulez-vous changez le nombre d'epoc
     model.eval()
 else:
     nombre_epoch = int(input("Quel nombre d'epoch ? \n"))
-    if os.path.exists(f"mlp_model_{nombre_epoch}.pth"):
+    if os.path.exists(f"Models_saved/mlp_model_{nombre_epoch}.pth"):
         print("📥 Chargement du modèle MLP...")
-        model.load_state_dict(torch.load(f"mlp_model_{nombre_epoch}.pth"))
+        model.load_state_dict(torch.load(f"Models_saved/mlp_model_{nombre_epoch}.pth"))
         model.eval()
     else:
         print(f"Entrainement à {nombre_epoch} d'epoch")
@@ -119,7 +119,7 @@ submission["predicted"] = preds
 submission = submission[["Id", "predicted"]]
 
 # Sauvegarde
-submission.to_csv(f"submission{nombre_epoch}epoch.csv", index=False)
+submission.to_csv("submission.csv", index=False)
 
 print("✅ Fichier de soumission 'submission.csv' avec colonnes 'Id' et 'predicted' prêt.")
 
