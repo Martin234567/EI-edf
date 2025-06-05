@@ -8,11 +8,11 @@ from torch.utils.data import DataLoader, TensorDataset
 import os
 
 
-# --- Chargement des données ---
+# --- Chargement des données ----
 train_df = pd.read_csv("train.csv")
 test_df = pd.read_csv("test.csv")
 
-# --- Colonnes utiles ---
+#----- Préparation des données ------
 TARGET = "Electricity_balance_not_controllable"
 FEATURES = [
     "temperature", "nebulosity", "wind",
@@ -22,14 +22,6 @@ FEATURES = [
     "month", "tod", "toy", "week_number", "period_hour_changed"
 ]
 
-# Feature engineering 
-def create_rolling_mean_feature(df, feature_name='temperature', window=24):
-    """Crée une feature de moyenne mobile."""
-    df[f'{feature_name}_rolling_mean_{window}h'] = df.groupby('Id')[feature_name].rolling(window=window).mean().reset_index(level=0, drop=True)
-    return df
-
-
-# --- Prétraitement ---
 X = train_df[FEATURES]
 y = train_df[TARGET]
 
@@ -61,11 +53,11 @@ class MLP(nn.Module):
     def __init__(self, input_dim):
         super(MLP, self).__init__()
         self.model = nn.Sequential(
-            nn.Linear(input_dim, 128),
-            nn.BatchNorm1d(128),
+            nn.Linear(input_dim, 256),
+            nn.BatchNorm1d(256),
             nn.ELU(),
             nn.Dropout(0.2),
-            nn.Linear(128, 64),
+            nn.Linear(256, 64),
             nn.BatchNorm1d(64),
             nn.ELU(),
             nn.Dropout(0.1),
@@ -115,7 +107,10 @@ with torch.no_grad():
 
 # --- Sauvegarde du fichier de soumission ---
 
-submission = pd.read_csv("sample_submission.csv")
+submission = pd.read_csv("test.csv")
+
+#renomme la deuxième colonne de test.csv 
+submission.columns.values[1] = "predicted"
 
 # Remplace la colonne cible par 'predicted'
 submission["predicted"] = preds
@@ -124,7 +119,7 @@ submission["predicted"] = preds
 submission = submission[["Id", "predicted"]]
 
 # Sauvegarde
-submission.to_csv("submission2.csv", index=False)
+submission.to_csv(f"submission{nombre_epoch}epoch.csv", index=False)
 
 print("✅ Fichier de soumission 'submission.csv' avec colonnes 'Id' et 'predicted' prêt.")
 
